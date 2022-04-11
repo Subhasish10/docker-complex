@@ -1,0 +1,28 @@
+sudo: required
+services:
+      - docker
+
+before_install:
+      - docker build -t subhasish10/react-complex -f ./client/Dockerfile.dev ./client
+    
+
+script:
+        - docker run -e CI=true subhasish10/react-complex npm test
+
+
+after_success:
+      - docker build -t subhasish10/multi-client ./client
+      - docker build -t subhasish10/multi-nginx ./nginx
+      - docker build -t subhasish10/multi-server ./server
+      - docker build -t subhasish10/multi-worker ./worker
+
+# Docker CLI
+
+      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+
+# Docker PUSH
+
+      - docker push subhasish10/multi-client
+      - docker push subhasish10/multi-nginx
+      - docker push subhasish10/multi-server
+      - docker push subhasish10/multi-worker
